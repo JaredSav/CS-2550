@@ -1,0 +1,80 @@
+1.
+SELECT first_name, last_name, phone
+FROM student
+WHERE To_Char(registration_date, 'MM/DD/YYYY') = '02/13/2007'
+ORDER BY last_name, first_name;
+
+OR
+
+SELECT first_name, last_name, phone
+FROM student
+WHERE registration_date = '13-FEB-07'
+ORDER BY last_name, first_name;
+
+2.
+SELECT course_no, section_id, start_date_time
+FROM section
+WHERE location = 'L509'
+ORDER BY start_date_time;
+
+3.
+SELECT course_no, section_id, start_date_time, instructor_id, capacity
+FROM section
+WHERE To_Char(start_date_time, 'Mon YYYY') = 'Jul 2007'
+ORDER BY start_date_time, course_no;
+
+4.
+SELECT student_id, section_id, final_grade
+FROM enrollment
+WHERE To_Char(enroll_date, 'Mon YYYY') = 'Jan 2007'
+AND final_grade IS NOT NULL;
+
+5.
+SELECT To_Date('11-JAN-16', 'DD-MON-YY') + '109' AS Semester_End_Date
+From dual;
+
+6.
+SELECT course_no, location
+From section
+WHERE location LIKE 'L%'
+AND SUBSTR(location, -1, 1) = 0
+OR SUBSTR(location, -1, 1) = 2
+OR SUBSTR(location, -1, 1) = 4
+OR SUBSTR(location, -1, 1) = 6
+OR SUBSTR(location, -1, 1) = 8;
+
+7.
+SELECT last_name, first_name
+FROM student
+WHERE created_date +3 <= registration_date
+AND zip = '11368';
+
+8.
+SELECT first_name, last_name, To_Char((SYSDATE - registration_date) /365, '99.99') AS "Years"
+FROM student
+WHERE phone Like '212%'
+ORDER BY "Years" DESC;
+
+9.
+SELECT DISTINCT To_Char(start_date_time, 'HH:MI') AS "START"
+FROM section
+ORDER BY "START";
+
+10.
+SELECT student_id, section_id, To_Char(enroll_date, 'HH:MIAM') AS "ENROLLTIME"
+FROM enrollment
+WHERE To_Char(enroll_date, 'HH:MI') = '10:19'
+ORDER BY student_id;
+
+
+
+
+
+
+
+
+
+
+
+
+

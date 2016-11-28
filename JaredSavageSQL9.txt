@@ -1,0 +1,163 @@
+1.
+SELECT student_id, last_name, first_name, employer
+FROM student
+WHERE student_id IN
+  (SELECT student_id
+  FROM enrollment
+  GROUP BY enroll_date, student_id
+  HAVING COUNT(*) =
+      (SELECT MAX(num)
+      FROM
+          (SELECT COUNT(*) num, student_id
+          FROM enrollment
+          GROUP BY enroll_date, student_id)))
+ORDER BY last_name, first_name;
+
+2.
+SELECT i.zip, i.first_name, i.last_name, i.phone
+FROM instructor i JOIN section s
+ON i.instructor_id = s.instructor_id
+WHERE s.section_id IN
+(SELECT s.section_id
+FROM section s JOIN enrollment e
+ON s.section_id = e.section_id
+WHERE s.instructor_id IN
+        (SELECT DISTINCT instructor_id
+        FROM instructor i JOIN zipcode z
+        ON i.zip = z.zip
+        JOIN student s
+        ON z.zip = s.zip
+        WHERE s.zip = i.zip)
+AND e.student_id IN
+        (SELECT DISTINCT student_id
+        FROM instructor i JOIN zipcode z
+        ON i.zip = z.zip
+        JOIN student s
+        ON z.zip = s.zip
+        WHERE s.zip = i.zip))
+ORDER BY i.first_name;
+
+3.
+SELECT first_name, last_name, city, 'Instructor' AS "ROLE"
+FROM instructor i JOIN zipcode z
+ON i.zip = z.zip
+WHERE i.zip = '10025'
+UNION
+SELECT first_name, last_name, city, 'Student' AS "ROLE"
+FROM student s JOIN zipcode z
+ON s.zip = z.zip
+WHERE s.zip = '10025'
+ORDER BY role, last_name, first_name;
+
+4.
+SELECT sec.location, sections, students
+FROM
+(SELECT location, COUNT(*) SECTIONS
+FROM section
+GROUP BY location) sec
+JOIN
+(SELECT s.location, COUNT(*) STUDENTS
+FROM section s JOIN enrollment e
+ON s.section_id = e.section_id
+GROUP BY s.location) stu
+ON sec.location = stu.location
+ORDER BY sec.location;
+
+5.
+SELECT grade_type_code, To_Char(numeric_grade, '99.99') GRADE
+FROM grade
+WHERE student_id = 112
+AND section_id = 95
+UNION ALL
+SELECT 'Average for student 112', To_Char(AVG(numeric_grade), '99.99')
+FROM grade
+WHERE student_id = 112
+AND section_id = 95
+ORDER BY grade_type_code DESC;
+
+6. 
+SELECT first_name, last_name, To_Char(COUNT(*), '99') Sections
+FROM section s JOIN instructor i
+ON s.instructor_id = i.instructor_id
+GROUP BY s.instructor_id, first_name, last_name
+UNION ALL
+SELECT first_name, last_name, To_Char('0', '99') Section
+FROM instructor
+WHERE instructor_id IN
+    (SELECT instructor_id
+    FROM instructor
+    MINUS
+    SELECT DISTINCT instructor_id
+    FROM section)
+ORDER BY last_name, first_name;    
+
+7.
+SELECT course_no, description
+FROM
+(SELECT DISTINCT c.course_no, grade_type_code, description
+FROM grade g JOIN enrollment e
+ON g.student_id = e.student_id
+AND g.section_id = e.section_id
+JOIN section s 
+ON e.section_id = s.section_id
+JOIN course c
+ON s.course_no = c.course_no)
+GROUP BY course_no, description
+HAVING COUNT(*) =
+  (SELECT COUNT(*)
+  FROM grade_type)
+ORDER BY course_no;
+
+8.
+SELECT z.zip, z.city, NVL(stu.students, '0') Students
+FROM
+(SELECT zip, city, state
+FROM zipcode
+WHERE city = 'Stamford'
+AND state = 'CT') z
+LEFT OUTER JOIN
+(SELECT zip, COUNT(*) Students
+FROM student
+WHERE student_id IN
+      (SELECT DISTINCT student_id
+      FROM enrollment)
+      GROUP BY zip) stu
+ON z.zip =stu.zip
+ORDER BY z.zip;
+
+9.
+SELECT s.course_no, description, To_Char(COUNT(*), '99') Enrollment
+FROM enrollment e JOIN section s
+ON e.section_id = s.section_id
+JOIN course c
+ON s.course_no = c.course_no
+GROUP BY s.course_no, description
+HAVING description LIKE '%Programming%'
+UNION ALL
+SELECT course_no, description, To_Char('0', '99') Enrollment
+FROM course
+WHERE course_no IN
+      (SELECT course_no
+      FROM course
+      WHERE description LIKE '%Programming%'
+      MINUS
+      SELECT s.course_no
+      FROM enrollment e JOIN section s
+      ON e.section_id = s.section_id
+      JOIN course c
+      ON s.course_no = c.course_no)
+ORDER BY enrollment DESC;
+    
+10.
+SELECT stu.student_id, stu.first_name, stu.last_name, NVL(enr.num, '0') Enrollments
+FROM
+(SELECT e.student_id, s.last_name, s.first_name, COUNT(*) num
+FROM enrollment e JOIN student s
+ON e.student_id = s.student_id
+GROUP BY e.student_id, s.last_name, s.first_name) enr
+RIGHT OUTER JOIN
+(SELECT student_id, first_name, last_name
+FROM student
+WHERE phone LIKE '617%') stu
+ON enr.student_id = stu.student_id 
+ORDER BY stu.last_name, stu.first_name;

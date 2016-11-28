@@ -1,0 +1,135 @@
+1.
+INSERT INTO instructor
+(instructor_id, salutation, first_name, last_name, street_address, zip, phone, created_by, created_date, modified_by, modified_date)
+VALUES
+('815', 'Mr', 'Hugo', 'Reyes', '2342 Oceanic Way', '07002', null, 'JSAVAGE', sysdate, 'JSAVAGE', sysdate); 
+
+2.
+INSERT INTO section
+(section_id, course_no, section_no, start_date_time, location, instructor_id, capacity, created_by, created_date, modified_by, modified_date)
+VALUES
+('48', '142', '4', To_Date('September 22, 2011 08:15', 'Month DD, YYYY HH24:MI'), 'L211', '815', '15', 'JSAVAGE', sysdate, 'JSAVAGE', sysdate); 
+
+3.
+INSERT INTO enrollment
+(student_id, section_id, enroll_date, created_by, created_date, modified_by, modified_date)
+SELECT student_id, '48', sysdate, 'JSAVAGE', sysdate, 'JSAVAGE', sysdate
+FROM student
+WHERE student_id IN (375, 137, 266, 382);
+
+4.
+DELETE FROM grade
+WHERE student_id = '147'
+AND section_id='120';
+
+DELETE FROM enrollment
+WHERE student_id = '147'
+AND section_id = '120';
+
+5.
+DELETE FROM grade
+WHERE student_id = '180'
+AND section_id='119';
+
+DELETE FROM enrollment
+WHERE student_id = '180'
+AND section_id = '119';
+
+6.
+UPDATE instructor
+SET phone = '4815162342'
+WHERE instructor_id ='815';
+
+7.
+UPDATE grade
+SET numeric_grade = '100'
+WHERE section_id = '119'
+AND grade_type_code = 'HM'
+AND grade_code_occurrence = '1';
+
+8.
+UPDATE grade
+SET numeric_grade = ((numeric_grade * .1) + numeric_grade)
+WHERE section_id = '119'
+AND grade_type_code = 'FI';
+
+9.
+SELECT b.section_id, b.location, NVL(a.num, '0') ENROLLED
+FROM
+(SELECT s.section_id, COUNT(*) num
+FROM section s JOIN enrollment e
+ON s.section_id = e.section_id
+GROUP BY s.section_id) a
+RIGHT OUTER JOIN     
+(SELECT s.section_id, s.location
+FROM course c JOIN section s
+ON c.course_no = s.course_no
+WHERE description = 'Project Management') b 
+ON b.section_id = a.section_id
+ORDER BY b.section_id;
+
+10.
+SELECT i.first_name, i.last_name, i.phone
+FROM instructor i JOIN section s
+ON i.instructor_id = s.instructor_id
+JOIN course c
+ON s.course_no = c.course_no
+WHERE c.description = 'Project Management'
+ORDER BY i.first_name, i.last_name;
+
+11.
+SELECT g.student_id, s.first_name, s.last_name, To_Char(AVG(numeric_grade), '99.99') AVERAGE
+FROM grade g JOIN enrollment e
+ON g.student_id= e.student_id
+AND g.section_id = e.section_id
+JOIN student s
+ON e.student_id = s.student_id
+WHERE g.section_id = '119'
+GROUP BY g.student_id, s.first_name, s.last_name
+ORDER BY g.student_id;
+
+12.
+SELECT COUNT(*) AS "NUMBER_OF_INSTRUCTORS"
+FROM section
+WHERE location = 'L211'
+AND section_id IN
+(SELECT section_id
+FROM enrollment
+GROUP BY section_id
+HAVING COUNT(*) > 3)
+GROUP BY instructor_id;
+
+13.
+SELECT salutation||'. '||first_name||' '||last_name AS "INSTRUCTOR", phone
+FROM instructor
+WHERE instructor_id =
+    (SELECT instructor_id
+    FROM section
+    WHERE course_no = '142'
+    MINUS
+    SELECT instructor_id
+    FROM section
+    WHERE course_no != '142');
+
+14.
+SELECT s.first_name, s.last_name, e.section_id, sec.course_no
+FROM enrollment e JOIN student s
+ON e.student_id = s.student_id
+JOIN section sec
+ON e.section_id = sec.section_id
+WHERE e.section_id =
+    (SELECT section_id
+    FROM enrollment
+    MINUS
+    SELECT section_id
+    FROM grade);
+
+15.
+SELECT t.starttime, COUNT(*) Number_of_courses
+FROM
+(SELECT DISTINCT course_no, To_Char(start_date_time, 'HH:MIAM') AS starttime
+FROM section) t
+GROUP BY t.starttime
+ORDER BY t.starttime;
+
+

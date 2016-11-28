@@ -1,0 +1,73 @@
+1.
+SELECT first_name||' '||last_name AS "Student Name", phone
+FROM Student
+WHERE employer LIKE 'New York Culture';
+
+2.
+SELECT UNIQUE employer
+FROM Student
+WHERE employer LIKE '%Co.'
+ORDER BY employer;
+
+3.
+SELECT UPPER (last_name)||', '||SUBSTR (first_name,1,1)||'.' AS "Student Name", phone
+FROM Student
+WHERE phone LIKE '617%'
+ORDER BY last_name;
+
+4.
+SELECT first_name||' '||last_name AS "Instructor", street_address
+FROM instructor
+WHERE zip IS NULL;
+
+5.
+SELECT zip
+FROM zipcode
+WHERE city LIKE 'Jackson Heights'
+ORDER BY zip;
+
+6.
+SELECT course_no, location
+FROM section
+WHERE location LIKE '%10'
+ORDER BY location;
+
+7.
+SELECT 
+CASE 
+WHEN state LIKE 'MA' THEN 'Massachusetts'
+WHEN state LIKE 'OH' THEN 'Ohio'
+WHEN state LIKE 'PR' THEN 'Puerto Rico'
+WHEN state LIKE 'WV' THEN 'West Virginia'
+END AS "State Name", state, city
+FROM zipcode
+WHERE state LIKE 'MA'
+OR state LIKE 'OH'
+OR state LIKE 'PR'
+OR state LIKE 'WV'
+ORDER BY state;
+
+8.
+SELECT salutation||'. '||first_name||' '||last_name||' '||street_address||' '||zip AS "Instructor Address"
+FROM instructor
+WHERE zip = '10015'
+ORDER BY last_name;
+
+9.
+SELECT student_id, numeric_grade
+FROM grade
+WHERE section_id = '152'
+AND grade_type_code = 'QZ'
+ORDER BY numeric_grade DESC;
+
+10.
+SELECT student_id, numeric_grade, 
+CASE 
+WHEN numeric_grade >= 85 THEN 'Pass'
+Else 'Fail'
+END AS "GRADE RESULT"
+FROM grade
+WHERE section_id = '156'
+AND grade_type_code = 'FI'
+ORDER BY student_id;
+

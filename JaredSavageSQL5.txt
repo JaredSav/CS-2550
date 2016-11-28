@@ -1,0 +1,86 @@
+1.
+SELECT s.first_name, s.last_name, s.phone
+FROM student s JOIN zipcode z
+ON s.zip = z.zip
+WHERE z.city = 'Newark'
+ORDER BY last_name, first_name;
+
+2. 
+SELECT c.course_no, c.prerequisite, d.description
+FROM course c JOIN course d
+ON c.prerequisite = d.course_no 
+WHERE c.course_no BETWEEN '300' AND '399'
+AND c.prerequisite IS NOT NULL
+ORDER BY c.course_no;
+
+3.
+SELECT c.course_no, c.description
+FROM course c JOIN section s
+ON c.course_no = s.course_no
+JOIN instructor i
+ON s.instructor_id = i.instructor_id
+WHERE i.first_name = 'Charles'
+AND i.last_name = 'Lowry'
+AND c.course_no BETWEEN '100' AND '199'
+ORDER BY c.course_no;
+
+4.
+SELECT gt.grade_type_code, gt.description, gtw.number_per_section
+FROM grade_type gt JOIN grade_type_weight gtw
+ON gt.grade_type_code = gtw.grade_type_code
+JOIN section s
+ON gtw.section_id = s.section_id
+WHERE s.course_no = '144'
+ORDER BY gt.description;
+
+5.
+SELECT s.last_name||', '||s.first_name AS "STUDENT_NAME"
+FROM grade g JOIN enrollment e
+ON g.student_id = e.student_id
+JOIN student s
+ON e.student_id = s.student_id
+GROUP BY s.last_name, s.first_name
+HAVING AVG(numeric_grade) > '93'
+ORDER BY s.last_name, s.first_name;
+
+6.
+SELECT i.first_name, i.last_name, i.street_address, z.city, z.state, z.zip
+FROM zipcode z JOIN instructor i
+ON z.zip = i.zip
+JOIN section s
+ON i.instructor_id = s.instructor_id
+HAVING COUNT(*) < '10'
+GROUP BY i.first_name, i.last_name, i.street_address, z.city, z.state, z.zip;
+
+7.
+SELECT c.course_no, COUNT(*) Enrolled
+FROM course c JOIN section s
+ON c.course_no = s.course_no
+JOIN enrollment e
+ON s.section_id = e.section_id
+WHERE c.prerequisite IS NULL
+GROUP BY c.course_no
+ORDER BY COUNT(*) DESC;
+
+8.
+SELECT DISTINCT s.first_name, s.last_name, s.phone
+FROM zipcode z JOIN student s
+ON z.zip = s.zip
+JOIN enrollment e
+ON s.student_id = e.student_id
+WHERE city = 'Flushing'
+AND To_Char(e.enroll_date, 'DD-MON-YY HH24:MI') < '02-FEB-07 10:20'
+ORDER BY s.last_name, s.first_name;
+
+9.
+SELECT s.course_no
+FROM grade_type_weight gtw JOIN section s
+ON gtw.section_id = s.section_id
+WHERE gtw.grade_type_code = 'PJ'
+ORDER BY s.course_no;
+
+10.
+SELECT MAX(numeric_grade) HIGHEST_FINAL_GRADE
+FROM grade
+WHERE grade_type_code = 'FI'
+AND section_id = '145';
